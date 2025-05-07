@@ -1,0 +1,42 @@
+[
+  {
+    "id": "slide-alpha-001",
+    "title": "Microscopic Slide Alpha",
+    "description": "A detailed view of cellular structures, showcasing nucleus and cytoplasm variations. Captured at 40x magnification.",
+    "tags": ["biology", "cells", "microscopy", "nucleus"],
+    "imageUrl": "https://picsum.photos/seed/alpha_card/400/300",
+    "svsUrl": "https://picsum.photos/seed/alpha_svs/2000/1500"
+  },
+  {
+    "id": "histology-beta-002",
+    "title": "Histology Sample Beta",
+    "description": "Cross-section of epithelial tissue demonstrating distinct cell layers and intercellular junctions. Stained with H&E.",
+    "tags": ["histology", "tissue", "epithelium", "research"],
+    "imageUrl": "https://picsum.photos/seed/beta_card/400/300",
+    "svsUrl": "https://picsum.photos/seed/beta_svs/2000/1500"
+  },
+  {
+    "id": "pathology-gamma-003",
+    "title": "Pathology Specimen Gamma",
+    "description": "An interesting neoplastic formation with abnormal cell proliferation. Key for oncological studies.",
+    "tags": ["pathology", "medical", "oncology", "education"],
+    "imageUrl": "https://picsum.photos/seed/gamma_card/400/300",
+    "svsUrl": "https://picsum.photos/seed/gamma_svs/2000/1500"
+  },
+  {
+    "id": "botany-delta-004",
+    "title": "Botanical Specimen Delta",
+    "description": "Leaf structure of a rare plant, showing stomata and vascular bundles. Useful for plant physiology.",
+    "tags": ["botany", "plant", "leaf", "stomata"],
+    "imageUrl": "https://picsum.photos/seed/delta_card/400/300",
+    "svsUrl": "https://picsum.photos/seed/delta_svs/2000/1500"
+  },
+  {
+    "id": "geology-epsilon-005",
+    "title": "Geological Thin Section Epsilon",
+    "description": "Mineral composition of an igneous rock sample, viewed under polarized light. Reveals crystalline structures.",
+    "tags": ["geology", "mineralogy", "rock", "crystals"],
+    "imageUrl": "https://picsum.photos/seed/epsilon_card/400/300",
+    "svsUrl": "https://picsum.photos/seed/epsilon_svs/2000/1500"
+  }
+]
