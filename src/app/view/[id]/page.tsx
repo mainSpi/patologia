@@ -1,6 +1,8 @@
+
+import fs from 'fs/promises';
+import path from 'path';
 import type { CardData } from '@/types';
 import SVSViewer from '@/components/SVSViewer';
-// AppHeader is now in RootLayout
 import { Badge } from '@/components/ui/badge';
 import { Tag, Info, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,22 +10,22 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 async function getCardData(id: string): Promise<CardData | null> {
+  const filePath = path.join(process.cwd(), 'public', 'data', 'cards', `${id}.json`);
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002'; 
-    const res = await fetch(`${baseUrl}/data/cards.json`, { cache: 'no-store' }); 
-    if (!res.ok) {
-      console.error("Failed to fetch cards.json:", res.status, res.statusText);
-      return null;
-    }
-    const cards: CardData[] = await res.json();
-    const card = cards.find(c => c.id === id);
-    return card || null;
+    const fileContents = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(fileContents) as CardData;
   } catch (error) {
-    console.error("Error fetching card data:", error);
+    // console.error(`Failed to get card data for ${id}:`, error); // Log on server
+    // Check if the error is because the file doesn't exist
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+        // File not found specifically
+    } else {
+        // Other errors (e.g., parsing, permissions)
+        console.error(`Error reading or parsing card file ${id}.json:`, error);
+    }
     return null;
   }
 }
-
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const card = await getCardData(params.id);
@@ -38,7 +40,6 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-
 export default async function ViewPage({ params }: { params: { id: string } }) {
   const card = await getCardData(params.id);
 
@@ -51,9 +52,8 @@ export default async function ViewPage({ params }: { params: { id: string } }) {
     url: card.svsUrl,
   };
 
-
   return (
-    <div className="container mx-auto px-4 py-8"> {/* Changed from main tag to div, removed flex-grow */}
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <Button asChild variant="outline" size="sm">
           <Link href="/">
@@ -83,19 +83,16 @@ export default async function ViewPage({ params }: { params: { id: string } }) {
 }
 
 export async function generateStaticParams() {
+  const cardsDir = path.join(process.cwd(), 'public', 'data', 'cards');
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:9002';
-    const res = await fetch(`${baseUrl}/data/cards.json`);
-     if (!res.ok) {
-      console.error("Failed to fetch cards.json for static params:", res.status, res.statusText);
-      return [];
-    }
-    const cards: CardData[] = await res.json();
-    return cards.map((card) => ({
-      id: card.id,
-    }));
+    const filenames = await fs.readdir(cardsDir);
+    return filenames
+      .filter(filename => filename.endsWith('.json'))
+      .map(filename => ({
+        id: filename.replace('.json', ''),
+      }));
   } catch (error) {
-    console.error("Error in generateStaticParams:", error);
+    console.error("Error generating static params for card view pages:", error);
     return [];
   }
 }

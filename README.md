@@ -42,14 +42,9 @@ Follow these steps to get the application running locally:
 
 3.  **Set Up Environment Variables (Optional but Recommended):**
     The application might use environment variables. For local development, you can create a `.env.local` file in the project root.
-    One important variable is `NEXT_PUBLIC_BASE_URL`. If not set, it defaults to `http://localhost:9002` as configured in the `src/app/view/[id]/page.tsx` file.
-    To customize this, create or edit `.env.local` and add:
+    For example, if specific base URLs were needed for external services (though current data fetching is local via `fs`):
     ```
-    NEXT_PUBLIC_BASE_URL=http://your_desired_localhost_url:port
-    ```
-    For example, to stick with the default explicitly:
-    ```
-    NEXT_PUBLIC_BASE_URL=http://localhost:9002
+    NEXT_PUBLIC_SOME_SERVICE_URL=http://your_service_url
     ```
     If there's a `.env.example` file provided in the future, you can copy it to `.env.local` and modify the values accordingly:
     ```bash
@@ -89,12 +84,17 @@ The `package.json` file contains several scripts for managing and developing the
 ## Project Structure Overview
 
 *   `src/app/`: Contains the core application logic using Next.js App Router, including pages, layouts, and route handlers.
+    *   `src/app/HomePageClient.tsx`: Client component handling interactivity for the main card listing page.
 *   `src/components/`: Houses reusable UI components, including ShadCN UI elements.
 *   `src/ai/`: Includes Genkit AI flows, configurations, and related utilities.
-*   `public/`: Stores static assets accessible directly via URL (e.g., images, `data/cards.json`).
+*   `public/`: Stores static assets accessible directly via URL.
+    *   `public/data/cards/`: Contains individual JSON files, each representing a card (e.g., `some-card-id.json`).
 *   `src/lib/`: Utility functions and libraries.
 *   `src/hooks/`: Custom React hooks.
 *   `src/types/`: TypeScript type definitions.
+
+## Card Data
+Card data is stored as individual JSON files within the `public/data/cards/` directory. Each file (e.g., `slide-alpha-001.json`) contains the data for a single card, adhering to the `CardData` interface defined in `src/types/index.ts`. The application reads these files directly using Node.js `fs` module in Server Components and for build-time page generation.
 
 ## Troubleshooting
 
@@ -109,5 +109,6 @@ The `package.json` file contains several scripts for managing and developing the
     rm -rf node_modules yarn.lock
     yarn install
     ```
+*   **Card data errors:** If cards are not loading, ensure the JSON files in `public/data/cards/` are correctly formatted and accessible. Check server console logs for any `fs` related errors.
 
 Happy coding!
