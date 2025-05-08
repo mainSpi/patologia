@@ -1,3 +1,4 @@
+
 'use server';
 
 import fs from 'fs/promises';
@@ -12,22 +13,29 @@ const cardSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters long"),
   description: z.string().min(10, "Description must be at least 10 characters long"),
   tags: z.string().transform(tags => tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)),
-  imageUrl: z.string().url("Image URL must be a valid URL").min(1, "Image URL is required"),
-  svsUrl: z.string().url("SVS URL must be a valid URL").min(1, "SVS URL is required"),
+  imageUrl: z.string().min(1, "Image URL/Path is required"), // No longer z.string().url()
+  svsUrl: z.string().min(1, "SVS URL/Path is required"), // No longer z.string().url()
 });
 
 export type CardFormState = {
   message: string;
   errors?: Partial<Record<keyof z.infer<typeof cardSchema>, string[]>>;
   success: boolean;
+  newCardData?: CardData; // To help update client state after creation
 };
 
 const CARDS_DIR = path.join(process.cwd(), 'public/data/cards');
 
 function generateCardId(title: string): string {
   const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  const timestamp = Date.now().toString(36);
-  return `${slug}-${timestamp}`;
+  // Using a shorter timestamp and a random element to reduce length and ensure uniqueness
+  const timestamp = Date.now().toString(36).slice(-4);
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  let baseSlug = `${slug.substring(0, 30)}-${timestamp}${randomSuffix}`;
+  if (baseSlug.startsWith('-')) {
+    baseSlug = `card-${timestamp}${randomSuffix}`;
+  }
+  return baseSlug.substring(0, 50); // Max length for ID
 }
 
 export async function loginAction(password: string): Promise<{ success: boolean; message: string }> {
@@ -80,7 +88,7 @@ export async function createCardAction(prevState: CardFormState, formData: FormD
     await fs.writeFile(filePath, JSON.stringify(newCard, null, 2));
     revalidatePath('/admin');
     revalidatePath('/');
-    return { success: true, message: `Card "${title}" created successfully.` };
+    return { success: true, message: `Card "${title}" created successfully.`, newCardData: newCard };
   } catch (error) {
     console.error("Failed to create card:", error);
     return { success: false, message: "Failed to create card. Check server logs.", errors: {} };
@@ -108,11 +116,17 @@ export async function updateCardAction(cardId: string, prevState: CardFormState,
   
   try {
     const filePath = path.join(CARDS_DIR, `${cardId}.json`);
+    // Check if file exists before writing
+    try {
+        await fs.access(filePath);
+    } catch (e) {
+        return { success: false, message: `Card with ID "${cardId}" not found for update.`, errors: {} };
+    }
     await fs.writeFile(filePath, JSON.stringify(updatedCard, null, 2));
     revalidatePath('/admin');
     revalidatePath('/');
     revalidatePath(`/view/${cardId}`);
-    return { success: true, message: `Card "${title}" updated successfully.` };
+    return { success: true, message: `Card "${title}" updated successfully.`, newCardData: updatedCard };
   } catch (error) {
     console.error(`Failed to update card ${cardId}:`, error);
     return { success: false, message: `Failed to update card. Check server logs.`, errors: {} };
@@ -144,6 +158,7 @@ export async function getAllCardsForAdmin(): Promise<CardData[]> {
     return []; // Or throw an error
   }
   try {
+    await fs.mkdir(CARDS_DIR, { recursive: true }); // Ensure directory exists
     const filenames = await fs.readdir(CARDS_DIR);
     const cardPromises = filenames
       .filter(filename => filename.endsWith('.json'))
@@ -158,8 +173,14 @@ export async function getAllCardsForAdmin(): Promise<CardData[]> {
         }
       });
     const results = await Promise.all(cardPromises);
-    return results.filter(card => card !== null) as CardData[];
+    return results.filter(card => card !== null).sort((a,b) => a.title.localeCompare(b.title)) as CardData[];
   } catch (error) {
+    // If CARDS_DIR doesn't exist, readdir will fail.
+    // Check if it's an ENOENT error, which means the directory likely doesn't exist.
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+        console.warn("Cards directory not found. This is normal if no cards have been created yet.");
+        return []; // Return empty array if directory doesn't exist
+    }
     console.error("Failed to load cards data for admin:", error);
     return [];
   }

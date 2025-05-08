@@ -1,7 +1,8 @@
+
 'use client';
 
 import type { CardData } from '@/types';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,8 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -25,6 +24,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import CardForm from './CardForm';
+import type { CardFormState } from './actions';
 import { createCardAction, updateCardAction, deleteCardAction, logoutAction } from './actions';
 import { PlusCircle, Edit, Trash2, LogOut, Eye, RefreshCw, ExternalLink } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
@@ -43,11 +43,23 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
+  const allCommonTags = useMemo(() => {
+    const tagCounts: Record<string, number> = {};
+    cards.forEach(card => {
+      card.tags.forEach(tag => {
+        const lowerTag = tag.toLowerCase();
+        tagCounts[lowerTag] = (tagCounts[lowerTag] || 0) + 1;
+      });
+    });
+    return Object.entries(tagCounts)
+      .sort(([, countA], [, countB]) => countB - countA)
+      .slice(0, 15) // Show more common tags in admin form
+      .map(([tag]) => tag);
+  }, [cards]);
+
   const handleLogout = async () => {
     startTransition(async () => {
       await logoutAction();
-      // Revalidation in action should trigger page reload or redirect
-      // Forcing reload as a fallback
       window.location.reload();
     });
   };
@@ -56,7 +68,7 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
     startTransition(async () => {
       const result = await deleteCardAction(cardId);
       if (result.success) {
-        setCards(prev => prev.filter(card => card.id !== cardId));
+        setCards(prev => prev.filter(card => card.id !== cardId).sort((a,b) => a.title.localeCompare(b.title)));
         toast({ title: "Success", description: result.message, variant: "default" });
       } else {
         toast({ title: "Error", description: result.message, variant: "destructive" });
@@ -64,23 +76,18 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
     });
   };
   
-  const onFormSuccess = (message: string, newCardData?: CardData, updatedCardId?: string) => {
-    toast({ title: "Success", description: message, variant: "default" });
-    if (newCardData) { // Create
-      setCards(prev => [...prev, newCardData]); // This is tricky if ID is server-generated and not returned easily
-    } else if (updatedCardId && selectedCard) { // Update
-       // To get the full updated card data, we'd ideally refetch or get it from the action
-       // For now, optimistic update on client if possible, or just refresh from server.
-       // A simpler approach is to trigger a full re-fetch of cards or just update the fields if action provides them.
+  const onFormSuccess = (result: CardFormState, originalCardId?: string) => {
+    toast({ title: "Success", description: result.message, variant: "default" });
+    if (result.newCardData) {
+      if (originalCardId) { // Update
+        setCards(prev => prev.map(c => c.id === originalCardId ? result.newCardData! : c).sort((a,b) => a.title.localeCompare(b.title)));
+      } else { // Create
+        setCards(prev => [...prev, result.newCardData!].sort((a,b) => a.title.localeCompare(b.title)));
+      }
     }
-    // For simplicity, we rely on revalidatePath to refresh data, but for instant UI update:
-    // A better way would be for createCardAction/updateCardAction to return the created/updated card data.
-    // Then we can update `cards` state precisely.
-    // For now, closing dialogs. The list will refresh on next page load or via revalidatePath.
     setIsCreateDialogOpen(false);
     setIsEditDialogOpen(false);
     setSelectedCard(null);
-     // Force a re-fetch or rely on revalidatePath. For now, this requires a manual refresh or navigation.
   };
 
 
@@ -91,7 +98,7 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
         <div className="space-x-2">
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="default" onClick={() => setIsCreateDialogOpen(true)}>
+              <Button variant="default" onClick={() => { setSelectedCard(null); setIsCreateDialogOpen(true); }}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add New Card
               </Button>
             </DialogTrigger>
@@ -101,12 +108,15 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
                 <DialogDescription>Fill in the details for the new card.</DialogDescription>
               </DialogHeader>
               <CardForm
+                key="create-form" // Add key to reset form state when dialog reopens for create
                 action={async (prevState, formData) => {
+                  // `createCardAction` doesn't take cardId
                   const result = await createCardAction(prevState, formData);
-                  if (result.success) onFormSuccess(result.message);
+                  if (result.success) onFormSuccess(result);
                   return result;
                 }}
                 submitButtonText="Create Card"
+                allCommonTags={allCommonTags}
               />
             </DialogContent>
           </Dialog>
@@ -122,14 +132,21 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
         <div className="space-y-4">
           {cards.map(card => (
             <div key={card.id} className="bg-card p-4 rounded-lg shadow flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-4 flex-grow">
+              <div className="flex items-center gap-4 flex-grow min-w-0">
                 <div className="relative w-20 h-16 rounded overflow-hidden shrink-0">
-                   <Image src={card.imageUrl || `https://picsum.photos/seed/${card.id}/80/64`} alt={card.title} layout="fill" objectFit="cover" data-ai-hint="microscope image" />
+                   <Image 
+                      src={card.imageUrl.startsWith('http') ? card.imageUrl : `https://picsum.photos/seed/${card.id}/80/64`} 
+                      alt={card.title} 
+                      layout="fill" 
+                      objectFit="cover" 
+                      data-ai-hint="microscope image"
+                      onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/80/64`)} // Fallback for local paths
+                    />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-card-foreground">{card.title}</h3>
+                <div className="min-w-0">
+                  <h3 className="text-lg font-semibold text-card-foreground truncate" title={card.title}>{card.title}</h3>
                   <p className="text-xs text-muted-foreground">ID: {card.id}</p>
-                  <p className="text-sm text-muted-foreground line-clamp-1">{card.description}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-1" title={card.description}>{card.description}</p>
                 </div>
               </div>
               <div className="flex space-x-2 shrink-0 self-end sm:self-center">
@@ -152,7 +169,7 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setSelectedCard(card)}>
                       <Edit className="mr-1 h-3.5 w-3.5" /> Edit
                     </Button>
                   </DialogTrigger>
@@ -163,13 +180,16 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
                     </DialogHeader>
                     {selectedCard && (
                       <CardForm
+                        key={selectedCard.id} // Add key to reset form state for different cards
                         card={selectedCard}
                         action={async (prevState, formData) => {
+                            // `updateCardAction` needs cardId as the first argument
                             const result = await updateCardAction(selectedCard.id, prevState, formData);
-                            if (result.success) onFormSuccess(result.message, undefined, selectedCard.id);
+                            if (result.success) onFormSuccess(result, selectedCard.id);
                             return result;
                         }}
                         submitButtonText="Update Card"
+                        allCommonTags={allCommonTags}
                       />
                     )}
                   </DialogContent>
