@@ -6,7 +6,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import CardItem from '@/components/CardItem';
 import { Input } from '@/components/ui/input';
 import { Search, Loader2, ServerCrash, Tag, X } from 'lucide-react';
-import AppHeader from '@/components/AppHeader';
+// AppHeader is now in RootLayout
 import { Badge } from '@/components/ui/badge';
 
 export default function HomePage() {
@@ -96,121 +96,110 @@ export default function HomePage() {
 
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <AppHeader />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="mb-8 sticky top-[calc(3.5rem+1px)] md:top-[calc(4rem+1px)] bg-background py-4 z-30 shadow-sm -mx-4 px-4">
-          <div className="relative max-w-3xl mx-auto">
-            {/* Input area */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder={
-                  activeTags.length === 0 
-                    ? "Type a tag and press Enter..." 
-                    : "Add another tag..."
-                }
-                value={searchTerm}
-                onChange={handleInputChange}
-                onKeyDown={handleInputKeyDown}
-                className="pl-10 pr-4 py-3 w-full rounded-full text-base border-2 focus:border-primary transition-colors"
-                aria-label="Add tag to search"
-              />
-            </div>
-
-            {/* Display active tags */}
-            {activeTags.length > 0 && (
-              <div className="flex flex-wrap gap-2 items-center mt-3 px-1">
-                {/* Optional: "Active tags:" label */}
-                {/* <span className="text-sm text-muted-foreground">Filtering by:</span> */}
-                {activeTags.map(tag => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="py-1 px-2.5 rounded-md text-sm font-normal flex items-center gap-1.5 shadow-sm"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="rounded-full text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 p-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
-                      aria-label={`Remove tag ${tag}`}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
+    <div className="container mx-auto px-4 py-8"> {/* Changed from main tag to div, removed flex-grow */}
+      <div className="mb-8 sticky top-[calc(3.5rem+1px)] md:top-[calc(3.5rem+1px)] bg-background py-4 z-20 shadow-sm -mx-4 px-4"> {/* Adjusted top value */}
+        <div className="relative max-w-3xl mx-auto">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={
+                activeTags.length === 0 
+                  ? "Type a tag and press Enter..." 
+                  : "Add another tag..."
+              }
+              value={searchTerm}
+              onChange={handleInputChange}
+              onKeyDown={handleInputKeyDown}
+              className="pl-10 pr-4 py-3 w-full rounded-full text-base border-2 focus:border-primary transition-colors"
+              aria-label="Add tag to search"
+            />
           </div>
-          
-          {/* Common Tags */}
-          {commonTags.length > 0 && !isLoading && (
-            <div className="max-w-3xl mx-auto mt-4 pt-3 border-t border-border">
-              <div className="flex flex-wrap gap-2 items-center justify-start">
-                <Tag className="h-4 w-4 text-muted-foreground mr-1" />
-                <span className="text-xs text-muted-foreground font-medium">Common:</span>
-                {commonTags.map(tag => {
-                  const isActive = activeTags.includes(tag.toLowerCase());
-                  return (
-                    <Badge
-                      key={tag}
-                      variant={isActive ? "default" : "secondary"}
-                      className="cursor-pointer hover:bg-primary/80 hover:text-primary-foreground transition-colors text-xs font-normal"
-                      onClick={() => handleCommonTagClick(tag)}
-                      title={`Click to ${isActive ? 'remove' : 'add'} "${tag}" tag`}
-                    >
-                      {tag}
-                    </Badge>
-                  );
-                })}
-              </div>
+
+          {activeTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center mt-3 px-1">
+              {activeTags.map(tag => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="py-1 px-2.5 rounded-md text-sm font-normal flex items-center gap-1.5 shadow-sm"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="rounded-full text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 p-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                    aria-label={`Remove tag ${tag}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </Badge>
+              ))}
             </div>
           )}
         </div>
-
-        {isLoading && (
-          <div className="flex flex-col items-center justify-center text-center py-10">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-xl font-semibold text-foreground">Loading Cards...</p>
-            <p className="text-muted-foreground">Please wait a moment.</p>
+        
+        {commonTags.length > 0 && !isLoading && (
+          <div className="max-w-3xl mx-auto mt-4 pt-3 border-t border-border">
+            <div className="flex flex-wrap gap-2 items-center justify-start">
+              <Tag className="h-4 w-4 text-muted-foreground mr-1" />
+              <span className="text-xs text-muted-foreground font-medium">Common:</span>
+              {commonTags.map(tag => {
+                const isActive = activeTags.includes(tag.toLowerCase());
+                return (
+                  <Badge
+                    key={tag}
+                    variant={isActive ? "default" : "secondary"}
+                    className="cursor-pointer hover:bg-primary/80 hover:text-primary-foreground transition-colors text-xs font-normal"
+                    onClick={() => handleCommonTagClick(tag)}
+                    title={`Click to ${isActive ? 'remove' : 'add'} "${tag}" tag`}
+                  >
+                    {tag}
+                  </Badge>
+                );
+              })}
+            </div>
           </div>
         )}
+      </div>
 
-        {error && !isLoading && (
-          <div className="flex flex-col items-center justify-center text-center py-10 bg-destructive/10 p-6 rounded-lg">
-            <ServerCrash className="h-12 w-12 text-destructive mb-4" />
-            <p className="text-xl font-semibold text-destructive">Error Loading Data</p>
-            <p className="text-destructive-foreground">{error}</p>
-            <p className="text-xs text-muted-foreground mt-2">Please try refreshing the page or check the console for more details.</p>
-          </div>
-        )}
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center text-center py-10">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+          <p className="text-xl font-semibold text-foreground">Loading Cards...</p>
+          <p className="text-muted-foreground">Please wait a moment.</p>
+        </div>
+      )}
 
-        {!isLoading && !error && (
-          <>
-            {filteredCards.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredCards.map(card => (
-                  <CardItem key={card.id} card={card} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-xl font-semibold text-muted-foreground">
-                  {activeTags.length > 0 ? "No cards match your selected tags." : "No cards available."}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {activeTags.length > 0 ? "Try removing some tags or broadening your search." : "Try adding some search tags."}
-                </p>
-              </div>
-            )}
-          </>
-        )}
-      </main>
-      <footer className="py-6 text-center text-sm text-muted-foreground border-t">
-        <p>&copy; {new Date().getFullYear()} Card Explorer. All rights reserved.</p>
-      </footer>
+      {error && !isLoading && (
+        <div className="flex flex-col items-center justify-center text-center py-10 bg-destructive/10 p-6 rounded-lg">
+          <ServerCrash className="h-12 w-12 text-destructive mb-4" />
+          <p className="text-xl font-semibold text-destructive">Error Loading Data</p>
+          <p className="text-destructive-foreground">{error}</p>
+          <p className="text-xs text-muted-foreground mt-2">Please try refreshing the page or check the console for more details.</p>
+        </div>
+      )}
+
+      {!isLoading && !error && (
+        <>
+          {filteredCards.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {filteredCards.map(card => (
+                <CardItem key={card.id} card={card} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-xl font-semibold text-muted-foreground">
+                {activeTags.length > 0 ? "No cards match your selected tags." : "No cards available."}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {activeTags.length > 0 ? "Try removing some tags or broadening your search." : "Try adding some search tags."}
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
