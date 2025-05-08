@@ -1,9 +1,8 @@
-
 'use server';
 
 import fs from 'fs/promises';
 import path from 'path';
-import { cookies } from 'next/headers';
+import { cookies, type ReadonlyRequestCookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import type { CardData } from '@/types';
 import { ADMIN_PASSWORD, ADMIN_AUTH_COOKIE_NAME } from '@/lib/constants';
@@ -56,14 +55,15 @@ export async function logoutAction(): Promise<void> {
   revalidatePath('/admin');
 }
 
-export async function verifyAuth(): Promise<boolean> {
-  const cookieStore = cookies();
+// Updated verifyAuth to accept cookieStore
+export async function verifyAuth(cookieStore: ReadonlyRequestCookies): Promise<boolean> {
   const authToken = cookieStore.get(ADMIN_AUTH_COOKIE_NAME);
   return authToken?.value === 'true';
 }
 
 export async function createCardAction(prevState: CardFormState, formData: FormData): Promise<CardFormState> {
-  if (!(await verifyAuth())) {
+  const cookieStore = cookies();
+  if (!(await verifyAuth(cookieStore))) {
     return { success: false, message: "Unauthorized", errors: {} };
   }
 
@@ -96,7 +96,8 @@ export async function createCardAction(prevState: CardFormState, formData: FormD
 }
 
 export async function updateCardAction(cardId: string, prevState: CardFormState, formData: FormData): Promise<CardFormState> {
-  if (!(await verifyAuth())) {
+  const cookieStore = cookies();
+  if (!(await verifyAuth(cookieStore))) {
     return { success: false, message: "Unauthorized", errors: {} };
   }
 
@@ -134,7 +135,8 @@ export async function updateCardAction(cardId: string, prevState: CardFormState,
 }
 
 export async function deleteCardAction(cardId: string): Promise<{ success: boolean; message: string }> {
-  if (!(await verifyAuth())) {
+  const cookieStore = cookies();
+  if (!(await verifyAuth(cookieStore))) {
     return { success: false, message: "Unauthorized" };
   }
 
@@ -154,7 +156,8 @@ export async function deleteCardAction(cardId: string): Promise<{ success: boole
 }
 
 export async function getAllCardsForAdmin(): Promise<CardData[]> {
-  if (!(await verifyAuth())) {
+  const cookieStore = cookies();
+  if (!(await verifyAuth(cookieStore))) {
     return []; // Or throw an error
   }
   try {

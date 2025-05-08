@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { verifyAuth, getAllCardsForAdmin } from './actions';
 import AdminLoginClient from './AdminLoginClient';
 import AdminDashboardClient from './AdminDashboardClient';
@@ -11,7 +12,8 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const isAuthenticated = await verifyAuth();
+  const cookieStore = cookies(); // Call cookies() here
+  const isAuthenticated = await verifyAuth(cookieStore); // Pass cookieStore
 
   if (!isAuthenticated) {
     return <AdminLoginClient />;
@@ -20,6 +22,7 @@ export default async function AdminPage() {
   let cards = [];
   let errorLoadingCards = null;
   try {
+    // getAllCardsForAdmin will call cookies() itself and pass to its own verifyAuth call
     cards = await getAllCardsForAdmin();
   } catch (error) {
     console.error("Error fetching cards for admin dashboard:", error);
