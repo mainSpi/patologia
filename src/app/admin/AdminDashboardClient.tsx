@@ -137,9 +137,10 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
                    <Image 
                       src={card.imageUrl.startsWith('http') ? card.imageUrl : `https://picsum.photos/seed/${card.id}/80/64`} 
                       alt={card.title} 
-                      layout="fill" 
-                      objectFit="cover" 
+                      fill
+                      style={{ objectFit: "cover" }}
                       data-ai-hint="microscope image"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Example sizes, adjust as needed
                       onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/80/64`)} // Fallback for local paths
                     />
                 </div>
@@ -230,3 +231,4 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
     </div>
   );
 }
+

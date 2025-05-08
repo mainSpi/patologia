@@ -18,9 +18,10 @@ const CardItem: React.FC<CardItemProps> = ({ card }) => {
           <Image
             src={card.imageUrl}
             alt={card.title}
-            layout="fill"
-            objectFit="cover"
+            fill
+            style={{ objectFit: "cover" }}
             data-ai-hint="microscope slide"
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" // Example sizes
           />
         </div>
       </CardHeader>
@@ -47,3 +48,4 @@ const CardItem: React.FC<CardItemProps> = ({ card }) => {
 };
 
 export default CardItem;
+
