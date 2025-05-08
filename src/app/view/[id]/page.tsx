@@ -27,7 +27,9 @@ async function getCardData(id: string): Promise<CardData | null> {
   }
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+// Updated signature and usage for params
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise; // Await the params promise
   const card = await getCardData(params.id);
   if (!card) {
     return {
@@ -40,7 +42,9 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function ViewPage({ params }: { params: { id: string } }) {
+// Updated signature and usage for params
+export default async function ViewPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise; // Await the params promise
   const card = await getCardData(params.id);
 
   if (!card) {
@@ -96,3 +100,4 @@ export async function generateStaticParams() {
     return [];
   }
 }
+
