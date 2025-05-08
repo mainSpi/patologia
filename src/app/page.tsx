@@ -36,9 +36,7 @@ export default function HomePage() {
   const filteredCards = useMemo(() => {
     if (!searchTerm) return cards;
     return cards.filter(card =>
-      card.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      card.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.description.toLowerCase().includes(searchTerm.toLowerCase())
+      card.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [cards, searchTerm]);
 
@@ -51,11 +49,11 @@ export default function HomePage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search by title, description, or tags (e.g., biology, tissue)..."
+              placeholder="Search by tags (e.g., biology, tissue)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-3 w-full rounded-full text-base border-2 focus:border-primary transition-colors"
-              aria-label="Search cards"
+              aria-label="Search cards by tags"
             />
           </div>
         </div>
