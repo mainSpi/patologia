@@ -34,10 +34,19 @@ export default function HomePage() {
   }, []);
 
   const filteredCards = useMemo(() => {
-    if (!searchTerm) return cards;
-    return cards.filter(card =>
-      card.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const cleanedSearchTerm = searchTerm.trim().toLowerCase();
+    if (!cleanedSearchTerm) return cards;
+
+    const searchTagsArray = cleanedSearchTerm.split(/\s+/).filter(t => t.length > 0);
+    if (searchTagsArray.length === 0) return cards;
+
+    return cards.filter(card => {
+      const cardTagsLower = card.tags.map(t => t.toLowerCase());
+      // Check if EVERY searchTag from the input is found in at least one of the card's tags
+      return searchTagsArray.every(searchTag =>
+        cardTagsLower.some(cardTag => cardTag.includes(searchTag))
+      );
+    });
   }, [cards, searchTerm]);
 
   return (
@@ -49,7 +58,7 @@ export default function HomePage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Search by tags (e.g., biology, tissue)..."
+              placeholder="Search by tags (e.g., biology tissue)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-3 w-full rounded-full text-base border-2 focus:border-primary transition-colors"
