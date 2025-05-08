@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import AppHeader from '@/components/AppHeader';
 import Link from 'next/link';
-import { Home, LayoutDashboard, BarChart3, Settings, Microscope } from 'lucide-react';
+import { Home, LayoutDashboard, BarChart3, Settings, Microscope, ShieldCheck } from 'lucide-react';
 import { ActiveSidebarMenuButton } from '@/components/ActiveSidebarMenu';
 
 
@@ -52,6 +52,7 @@ export default function RootLayout({
                 <ActiveSidebarMenuButton href="/" icon={<Home className="h-4 w-4 shrink-0" />} label="Home" tooltip="Home" />
                 <ActiveSidebarMenuButton href="/dashboard" icon={<LayoutDashboard className="h-4 w-4 shrink-0" />} label="Dashboard" tooltip="Dashboard" />
                 <ActiveSidebarMenuButton href="/analytics" icon={<BarChart3 className="h-4 w-4 shrink-0" />} label="Analytics" tooltip="Analytics" />
+                <ActiveSidebarMenuButton href="/admin" icon={<ShieldCheck className="h-4 w-4 shrink-0" />} label="Admin" tooltip="Admin" />
                 <ActiveSidebarMenuButton href="/settings" icon={<Settings className="h-4 w-4 shrink-0" />} label="Settings" tooltip="Settings" />
               </SidebarMenu>
             </SidebarContent>
