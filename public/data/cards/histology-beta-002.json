@@ -1,8 +1,9 @@
+
 {
   "id": "histology-beta-002",
   "title": "Histology Sample Beta",
   "description": "Cross-section of epithelial tissue demonstrating distinct cell layers and intercellular junctions. Stained with H&E.",
   "tags": ["histology", "tissue", "epithelium", "research"],
-  "imageUrl": "https://picsum.photos/seed/beta_card/400/300",
-  "svsUrl": "https://picsum.photos/seed/beta_svs/2000/1500"
+  "imageUrl": "/laminas/histology-beta-002-card.jpg",
+  "svsUrl": "/laminas/histology-beta-002-svs.jpg"
 }

@@ -179,11 +179,11 @@ export default function CardForm({ card, action, submitButtonText, allCommonTags
         <Input
           id="imageUrl"
           name="imageUrl"
-          type="text" // Changed from url to text
+          type="text"
           defaultValue={card?.imageUrl}
           required
           className="mt-1"
-          placeholder="e.g., /images/my-slide.jpg or https://example.com/image.png"
+          placeholder="e.g., /laminas/my-slide.jpg or https://example.com/image.png"
           aria-describedby="imageUrl-error"
         />
         {state.errors?.imageUrl && <p id="imageUrl-error" className="text-sm text-destructive mt-1">{state.errors.imageUrl.join(', ')}</p>}
@@ -194,11 +194,11 @@ export default function CardForm({ card, action, submitButtonText, allCommonTags
         <Input
           id="svsUrl"
           name="svsUrl"
-          type="text" // Changed from url to text
+          type="text"
           defaultValue={card?.svsUrl}
           required
           className="mt-1"
-          placeholder="e.g., /slides/my-slide.dzi or https://openseadragon.github.io/example-images/highsmith/highsmith.dzi"
+          placeholder="e.g., /laminas/my-slide.dzi or /laminas/my-large-image.jpg"
           aria-describedby="svsUrl-error"
         />
         {state.errors?.svsUrl && <p id="svsUrl-error" className="text-sm text-destructive mt-1">{state.errors.svsUrl.join(', ')}</p>}
@@ -208,3 +208,4 @@ export default function CardForm({ card, action, submitButtonText, allCommonTags
     </form>
   );
 }
+

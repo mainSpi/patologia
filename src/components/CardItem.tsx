@@ -1,51 +1,59 @@
+
 import type { CardData } from '@/types';
-import Link from 'next/link';
 import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Tag, Eye } from 'lucide-react';
-import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Eye } from 'lucide-react';
 
 interface CardItemProps {
   card: CardData;
 }
 
-const CardItem: React.FC<CardItemProps> = ({ card }) => {
+export default function CardItem({ card }: CardItemProps) {
   return (
-    <Card className="flex flex-col h-full overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <CardHeader className="p-0">
-        <div className="relative w-full h-48">
-          <Image
-            src={card.imageUrl}
-            alt={card.title}
-            fill
-            style={{ objectFit: "cover" }}
-            data-ai-hint="microscope slide"
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" // Example sizes
-          />
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 flex-grow">
-        <CardTitle className="text-xl font-semibold mb-2 text-primary">{card.title}</CardTitle>
-        <CardDescription className="text-sm text-muted-foreground mb-3 line-clamp-3">{card.description}</CardDescription>
-        <div className="flex flex-wrap gap-2 mt-2 items-center">
-          <Tag className="h-4 w-4 text-accent mr-1" />
-          {card.tags.slice(0, 3).map(tag => (
-            <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-          ))}
-          {card.tags.length > 3 && <Badge variant="outline" className="text-xs">+{card.tags.length - 3} more</Badge>}
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 border-t">
-        <Button asChild className="w-full" size="sm">
-          <Link href={`/view/${card.id}`}>
+    <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
+      <Link href={`/view/${card.id}`} className="block group flex flex-col h-full">
+        <CardHeader className="p-0">
+          <div className="relative w-full h-48 overflow-hidden">
+            <Image
+              src={card.imageUrl}
+              alt={card.title}
+              fill
+              style={{ objectFit: 'cover' }}
+              className="group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              data-ai-hint="microscope slide"
+              onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/400/300`)}
+            />
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 flex-grow">
+          <CardTitle className="text-lg mb-1 group-hover:text-primary transition-colors truncate" title={card.title}>
+            {card.title}
+          </CardTitle>
+          <CardDescription className="text-sm line-clamp-3 mb-2 h-[3.75rem]" title={card.description}>
+            {card.description}
+          </CardDescription>
+          {card.tags && card.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {card.tags.slice(0, 3).map(tag => (
+                <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+              ))}
+              {card.tags.length > 3 && (
+                <Badge variant="outline" className="text-xs">+{card.tags.length - 3}</Badge>
+              )}
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="p-4 pt-0 border-t mt-auto">
+          <div
+            className="w-full text-sm inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-3"
+          >
             <Eye className="mr-2 h-4 w-4" /> View Details
-          </Link>
-        </Button>
-      </CardFooter>
+          </div>
+        </CardFooter>
+      </Link>
     </Card>
   );
-};
-
-export default CardItem;
-
+}

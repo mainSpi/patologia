@@ -1,8 +1,9 @@
+
 {
   "id": "botany-delta-004",
   "title": "Botanical Specimen Delta",
   "description": "Leaf structure of a rare plant, showing stomata and vascular bundles. Useful for plant physiology.",
   "tags": ["botany", "plant", "leaf", "stomata"],
-  "imageUrl": "https://picsum.photos/seed/delta_card/400/300",
-  "svsUrl": "https://picsum.photos/seed/delta_svs/2000/1500"
+  "imageUrl": "/laminas/botany-delta-004-card.jpg",
+  "svsUrl": "/laminas/botany-delta-004-svs.jpg"
 }

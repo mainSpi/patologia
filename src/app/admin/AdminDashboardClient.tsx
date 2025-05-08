@@ -135,13 +135,13 @@ export default function AdminDashboardClient({ initialCards }: AdminDashboardCli
               <div className="flex items-center gap-4 flex-grow min-w-0">
                 <div className="relative w-20 h-16 rounded overflow-hidden shrink-0">
                    <Image 
-                      src={card.imageUrl.startsWith('http') ? card.imageUrl : `https://picsum.photos/seed/${card.id}/80/64`} 
+                      src={card.imageUrl} // Use card.imageUrl directly
                       alt={card.title} 
                       fill
                       style={{ objectFit: "cover" }}
                       data-ai-hint="microscope image"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Example sizes, adjust as needed
-                      onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/80/64`)} // Fallback for local paths
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/80/64`)} // Fallback
                     />
                 </div>
                 <div className="min-w-0">

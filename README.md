@@ -1,3 +1,4 @@
+
 # Card Explorer (Next.js Application)
 
 This is a Next.js application designed for exploring and viewing SVS (ScanScope Virtual Slide) images associated with tagged cards. It was initiated as a starter project in Firebase Studio.
@@ -92,12 +93,17 @@ The `package.json` file contains several scripts for managing and developing the
 *   `src/ai/`: Includes Genkit AI flows, configurations, and related utilities.
 *   `public/`: Stores static assets accessible directly via URL.
     *   `public/data/cards/`: Contains individual JSON files, each representing a card (e.g., `some-card-id.json`).
+    *   `public/laminas/`: Stores image files (e.g., `.jpg`, `.png`) and SVS/DZI files that are referenced by cards. Files in this directory are served publicly.
 *   `src/lib/`: Utility functions and libraries (e.g., `constants.ts` for admin password configuration).
 *   `src/hooks/`: Custom React hooks.
 *   `src/types/`: TypeScript type definitions.
 
 ## Card Data
-Card data is stored as individual JSON files within the `public/data/cards/` directory. Each file (e.g., `slide-alpha-001.json`) contains the data for a single card, adhering to the `CardData` interface defined in `src/types/index.ts`. The application reads these files directly using Node.js `fs` module in Server Components and for build-time page generation.
+Card data is stored as individual JSON files within the `public/data/cards/` directory. Each file (e.g., `slide-alpha-001.json`) contains the data for a single card, adhering to the `CardData` interface defined in `src/types/index.ts`.
+- `imageUrl`: Path to a display image for the card (e.g., `/laminas/my-image.jpg`).
+- `svsUrl`: Path to an SVS/DZI file or a large image for OpenSeadragon (e.g., `/laminas/my-slide.dzi` or `/laminas/my-large-image.jpg`).
+
+These image and SVS files should be placed in the `public/laminas/` directory. The application reads the JSON card data files directly using Node.js `fs` module in Server Components and for build-time page generation.
 
 ## Admin Access
 The application includes an admin section for managing cards. Access to this section is protected by a password.
@@ -122,6 +128,8 @@ If not set, it defaults to `admin123`.
     yarn install
     ```
 *   **Card data errors:** If cards are not loading, ensure the JSON files in `public/data/cards/` are correctly formatted and accessible. Check server console logs for any `fs` related errors.
+*   **Image/SVS not loading:** Ensure the image and SVS files referenced in your card JSONs are present in the `public/laminas/` directory and the paths in the JSON files are correct (e.g., `/laminas/your-file.jpg`).
 *   **Admin login issues:** Ensure the `ADMIN_PASSWORD` environment variable is correctly set in `.env.local` if you are using a custom password.
 
 Happy coding!
+

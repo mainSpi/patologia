@@ -1,93 +1,118 @@
 
 import fs from 'fs/promises';
 import path from 'path';
+import type { Metadata, ResolvingMetadata } from 'next';
+import { notFound } from 'next/navigation';
 import type { CardData } from '@/types';
 import SVSViewer from '@/components/SVSViewer';
 import { Badge } from '@/components/ui/badge';
-import { Tag, Info, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft, Tag } from 'lucide-react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+
+interface CardViewPageProps {
+  params: { id: string };
+}
 
 async function getCardData(id: string): Promise<CardData | null> {
-  const filePath = path.join(process.cwd(), 'public', 'data', 'cards', `${id}.json`);
+  const cardsDir = path.join(process.cwd(), 'public/data/cards');
+  const filePath = path.join(cardsDir, `${id}.json`);
   try {
     const fileContents = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(fileContents) as CardData;
   } catch (error) {
-    // console.error(`Failed to get card data for ${id}:`, error); // Log on server
-    // Check if the error is because the file doesn't exist
     if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
-        // File not found specifically
-    } else {
-        // Other errors (e.g., parsing, permissions)
-        console.error(`Error reading or parsing card file ${id}.json:`, error);
+      return null; 
     }
+    console.error(`Failed to load card data for ID ${id}:`, error);
+    // For other errors, we might want to throw or handle differently,
+    // but for now, returning null will lead to a 404.
     return null;
   }
 }
 
-// Updated signature and usage for params
-export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
-  const params = await paramsPromise; // Await the params promise
+export async function generateMetadata(
+  { params }: CardViewPageProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
   const card = await getCardData(params.id);
+
   if (!card) {
     return {
       title: 'Card Not Found',
     };
   }
+
   return {
     title: `${card.title} - Card Explorer`,
     description: card.description,
   };
 }
 
-// Updated signature and usage for params
-export default async function ViewPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
-  const params = await paramsPromise; // Await the params promise
+export default async function CardViewPage({ params }: CardViewPageProps) {
+  // Fetch card data within the Server Component
   const card = await getCardData(params.id);
 
   if (!card) {
     notFound();
   }
-  
-  const tileSourceOptions = {
-    type: 'image',
-    url: card.svsUrl,
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <Button asChild variant="outline" size="sm">
+        <Button variant="outline" asChild>
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Explorer
           </Link>
         </Button>
       </div>
-      <div className="bg-card p-6 rounded-lg shadow-xl mb-8">
-        <h1 className="text-3xl font-bold text-primary mb-2">{card.title}</h1>
-        <div className="flex flex-wrap gap-2 items-center mb-4">
-          <Tag className="h-5 w-5 text-accent mr-1" />
-          {card.tags.map(tag => (
-            <Badge key={tag} variant="secondary">{tag}</Badge>
-          ))}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2">
+          <SVSViewer tileSource={card.svsUrl} viewerId={`svs-viewer-${card.id}`} />
         </div>
-        <p className="text-muted-foreground flex items-start">
-          <Info className="h-5 w-5 text-accent mr-2 mt-1 shrink-0" />
-          <span>{card.description}</span>
-        </p>
+
+        <div className="md:col-span-1">
+          <div className="bg-card p-6 rounded-lg shadow-xl sticky top-20">
+            <div className="relative w-full h-40 rounded-md overflow-hidden mb-4 shadow-inner">
+              <Image
+                src={card.imageUrl}
+                alt={`Preview of ${card.title}`}
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="(max-width: 768px) 100vw, 33vw"
+                data-ai-hint="microscope image detail"
+                onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/400/200`)}
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-primary mb-3">{card.title}</h1>
+            <p className="text-muted-foreground mb-4 text-sm">{card.description}</p>
+            
+            {card.tags && card.tags.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-secondary-foreground mb-2 flex items-center">
+                  <Tag className="mr-2 h-5 w-5 text-muted-foreground" />
+                  Tags
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {card.tags.map(tag => (
+                    <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+             <p className="text-xs text-muted-foreground mt-6">ID: {card.id}</p>
+          </div>
+        </div>
       </div>
-      
-      <SVSViewer viewerId={`openseadragon-viewer-${card.id}`} tileSource={tileSourceOptions} />
-      
     </div>
   );
 }
 
 export async function generateStaticParams() {
-  const cardsDir = path.join(process.cwd(), 'public', 'data', 'cards');
+  const cardsDir = path.join(process.cwd(), 'public/data/cards');
   try {
     const filenames = await fs.readdir(cardsDir);
     return filenames
@@ -96,8 +121,7 @@ export async function generateStaticParams() {
         id: filename.replace('.json', ''),
       }));
   } catch (error) {
-    console.error("Error generating static params for card view pages:", error);
+    console.warn("Could not read cards directory for generateStaticParams. This is normal if no cards exist yet.", error);
     return [];
   }
 }
-
