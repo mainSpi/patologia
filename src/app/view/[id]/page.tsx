@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
 interface CardViewPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string }; // Changed from Promise<{ id: string }> to { id: string }
 }
 
 async function getCardData(id: string): Promise<CardData | null> {
@@ -32,8 +32,10 @@ async function getCardData(id: string): Promise<CardData | null> {
   }
 }
 
-export async function generateMetadata(props: CardViewPageProps, parent: ResolvingMetadata): Promise<Metadata> {
-  const params = await props.params;
+export async function generateMetadata(
+  { params }: CardViewPageProps, // Destructure params directly
+  parent: ResolvingMetadata
+): Promise<Metadata> {
   const card = await getCardData(params.id);
 
   if (!card) {
@@ -48,8 +50,7 @@ export async function generateMetadata(props: CardViewPageProps, parent: Resolvi
   };
 }
 
-export default async function CardViewPage(props: CardViewPageProps) {
-  const params = await props.params;
+export default async function CardViewPage({ params }: CardViewPageProps) { // Destructure params directly
   // Fetch card data within the Server Component
   const card = await getCardData(params.id);
 
@@ -70,7 +71,8 @@ export default async function CardViewPage(props: CardViewPageProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          <SVSViewer tileSource={card.svsUrl} viewerId={`svs-viewer-${card.id}`} />
+          {/* Removed viewerId prop */}
+          <SVSViewer tileSource={card.svsUrl} />
         </div>
 
         <div className="md:col-span-1">
@@ -82,6 +84,7 @@ export default async function CardViewPage(props: CardViewPageProps) {
                 fill
                 style={{ objectFit: 'cover' }}
                 sizes="(max-width: 768px) 100vw, 33vw"
+                onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/200/160`)} 
               />
             </div>
             <h1 className="text-3xl font-bold text-primary mb-3">{card.title}</h1>
@@ -111,6 +114,7 @@ export default async function CardViewPage(props: CardViewPageProps) {
 export async function generateStaticParams() {
   const cardsDir = path.join(process.cwd(), 'public/data/cards');
   try {
+    await fs.mkdir(cardsDir, { recursive: true }); // Ensure directory exists
     const filenames = await fs.readdir(cardsDir);
     return filenames
       .filter(filename => filename.endsWith('.json'))
@@ -118,7 +122,12 @@ export async function generateStaticParams() {
         id: filename.replace('.json', ''),
       }));
   } catch (error) {
-    console.warn("Could not read cards directory for generateStaticParams. This is normal if no cards exist yet.", error);
+     if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+        console.warn("Cards directory not found for generateStaticParams. This is normal if no cards have been created yet.");
+        return []; 
+    }
+    console.error("Could not read cards directory for generateStaticParams:", error);
     return [];
   }
 }
+

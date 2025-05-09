@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack -p 9002",
+    "dev": "next dev --turbopack -p 8080",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build",
-    "start": "next start",
+    "build": "next build -p 8080",
+    "start": "next start -p 8080",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
@@ -45,7 +45,7 @@
     "genkit": "^1.6.2",
     "lucide-react": "^0.475.0",
     "next": "15.2.3",
-    "openseadragon": "^4.1.1",
+    "openseadragon-react-viewer": "^3.0.2",
     "patch-package": "^8.0.0",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
@@ -58,7 +58,6 @@
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/openseadragon": "^3.0.9",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "genkit-cli": "^1.6.2",
@@ -67,3 +66,4 @@
     "typescript": "^5"
   }
 }
+
