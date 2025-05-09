@@ -82,8 +82,6 @@ export default async function CardViewPage(props: CardViewPageProps) {
                 fill
                 style={{ objectFit: 'cover' }}
                 sizes="(max-width: 768px) 100vw, 33vw"
-                data-ai-hint="microscope image detail"
-                onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/400/200`)}
               />
             </div>
             <h1 className="text-3xl font-bold text-primary mb-3">{card.title}</h1>
