@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 
 interface CardViewPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getCardData(id: string): Promise<CardData | null> {
@@ -32,10 +32,8 @@ async function getCardData(id: string): Promise<CardData | null> {
   }
 }
 
-export async function generateMetadata(
-  { params }: CardViewPageProps,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata(props: CardViewPageProps, parent: ResolvingMetadata): Promise<Metadata> {
+  const params = await props.params;
   const card = await getCardData(params.id);
 
   if (!card) {
@@ -50,7 +48,8 @@ export async function generateMetadata(
   };
 }
 
-export default async function CardViewPage({ params }: CardViewPageProps) {
+export default async function CardViewPage(props: CardViewPageProps) {
+  const params = await props.params;
   // Fetch card data within the Server Component
   const card = await getCardData(params.id);
 

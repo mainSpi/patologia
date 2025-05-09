@@ -23,8 +23,6 @@ export default function CardItem({ card }: CardItemProps) {
               style={{ objectFit: 'cover' }}
               className="group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              data-ai-hint="microscope slide"
-              onError={(e) => (e.currentTarget.src = `https://picsum.photos/seed/${card.id}/400/300`)}
             />
           </div>
         </CardHeader>

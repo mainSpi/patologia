@@ -39,7 +39,7 @@ function generateCardId(title: string): string {
 
 export async function loginAction(password: string): Promise<{ success: boolean; message: string }> {
   if (password === ADMIN_PASSWORD) {
-    cookies().set(ADMIN_AUTH_COOKIE_NAME, 'true', {
+    (await cookies()).set(ADMIN_AUTH_COOKIE_NAME, 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24, // 1 day
@@ -51,7 +51,7 @@ export async function loginAction(password: string): Promise<{ success: boolean;
 }
 
 export async function logoutAction(): Promise<void> {
-  cookies().delete(ADMIN_AUTH_COOKIE_NAME);
+  (await cookies()).delete(ADMIN_AUTH_COOKIE_NAME);
   revalidatePath('/admin');
 }
 
@@ -62,7 +62,7 @@ export async function verifyAuth(cookieStore: ReadonlyRequestCookies): Promise<b
 }
 
 export async function createCardAction(prevState: CardFormState, formData: FormData): Promise<CardFormState> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   if (!(await verifyAuth(cookieStore))) {
     return { success: false, message: "Unauthorized", errors: {} };
   }
@@ -96,7 +96,7 @@ export async function createCardAction(prevState: CardFormState, formData: FormD
 }
 
 export async function updateCardAction(cardId: string, prevState: CardFormState, formData: FormData): Promise<CardFormState> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   if (!(await verifyAuth(cookieStore))) {
     return { success: false, message: "Unauthorized", errors: {} };
   }
@@ -135,7 +135,7 @@ export async function updateCardAction(cardId: string, prevState: CardFormState,
 }
 
 export async function deleteCardAction(cardId: string): Promise<{ success: boolean; message: string }> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   if (!(await verifyAuth(cookieStore))) {
     return { success: false, message: "Unauthorized" };
   }
@@ -156,7 +156,7 @@ export async function deleteCardAction(cardId: string): Promise<{ success: boole
 }
 
 export async function getAllCardsForAdmin(): Promise<CardData[]> {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   if (!(await verifyAuth(cookieStore))) {
     return []; // Or throw an error
   }

@@ -12,7 +12,7 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
-  const cookieStore = cookies(); // Call cookies() here
+  const cookieStore = await cookies(); // Call cookies() here
   const isAuthenticated = await verifyAuth(cookieStore); // Pass cookieStore
 
   if (!isAuthenticated) {
