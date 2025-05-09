@@ -27,7 +27,7 @@ const initialState: CardFormState = {
 };
 
 export default function CardForm({ card, action, submitButtonText, allCommonTags = [] }: CardFormProps) {
-  const [state, formAction] = useFormState(action, initialState);
+  const [state, formAction] = useActionState(action, initialState);
   const [activeFormTags, setActiveFormTags] = useState<string[]>(card?.tags || []);
   const [newTagInputValue, setNewTagInputValue] = useState('');
   const [hiddenTagsValue, setHiddenTagsValue] = useState<string>((card?.tags || []).join(','));
